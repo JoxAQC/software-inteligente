@@ -1,42 +1,64 @@
-import pandas as pd
-import numpy as np
+# Standard Library Imports
 from collections import Counter
+from warnings import filterwarnings
+
+# Third-Party Imports
+# Data Manipulation & Visualization
 import matplotlib.pyplot as plt
-import seaborn as sns
 import missingno as msno
-import plotly.offline as py
-py.init_notebook_mode(connected=True)
-import plotly.graph_objs as go
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+# Plotly
 import plotly.express as px
-import plotly.tools as tls
 import plotly.figure_factory as ff
+import plotly.graph_objs as go
+import plotly.offline as py
+import plotly.tools as tls
+py.init_notebook_mode(connected=True)
+
+# Streamlit
 import streamlit as st
 
-from warnings import filterwarnings
-filterwarnings('ignore')
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler,StandardScaler
-
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Activation,Dropout
-
-# Modelling Libraries
-from sklearn.linear_model import LogisticRegression,RidgeClassifier,SGDClassifier,PassiveAggressiveClassifier
-from sklearn.linear_model import Perceptron
-from sklearn.svm import SVC,LinearSVC,NuSVC
-from sklearn.neighbors import KNeighborsClassifier,NearestCentroid
+# Machine Learning
+from sklearn.ensemble import (
+    AdaBoostClassifier,
+    GradientBoostingClassifier,
+    RandomForestClassifier,
+    VotingClassifier
+)
+from sklearn.linear_model import (
+    LogisticRegression,
+    PassiveAggressiveClassifier,
+    Perceptron,
+    RidgeClassifier,
+    SGDClassifier
+)
+from sklearn.metrics import accuracy_score, precision_score
+from sklearn.model_selection import (
+    GridSearchCV,
+    RandomizedSearchCV,
+    RepeatedStratifiedKFold,
+    train_test_split
+)
+from sklearn.naive_bayes import BernoulliNB, GaussianNB
+from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.svm import LinearSVC, NuSVC, SVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier,GradientBoostingClassifier
-from sklearn.naive_bayes import GaussianNB,BernoulliNB
-from sklearn.ensemble import VotingClassifier
 
-# Evaluation & CV Libraries
-from sklearn.metrics import precision_score,accuracy_score
-from sklearn.model_selection import RandomizedSearchCV,GridSearchCV,RepeatedStratifiedKFold
+# Deep Learning
+import tensorflow as tf
+from tensorflow.keras.layers import Activation, Dense, Dropout
+from tensorflow.keras.models import Sequential
+
+# Configuration
+filterwarnings('ignore')
 
 def run():
-    data = pd.read_csv('water_potability.xls')
+    
+    data = pd.read_csv('proyectos/water_potability.xls')
 
     data.head()
 
