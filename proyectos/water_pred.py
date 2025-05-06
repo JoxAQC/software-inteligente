@@ -1,62 +1,63 @@
-# Standard Library Imports
-from collections import Counter
-from warnings import filterwarnings
-
-# Third-Party Imports
-# Data Manipulation & Visualization
-import matplotlib.pyplot as plt
-import missingno as msno
-import numpy as np
-import pandas as pd
-import seaborn as sns
-
-# Plotly
-import plotly.express as px
-import plotly.figure_factory as ff
-import plotly.graph_objs as go
-import plotly.offline as py
-import plotly.tools as tls
-py.init_notebook_mode(connected=True)
-
-# Streamlit
-import streamlit as st
-
-# Machine Learning
-from sklearn.ensemble import (
-    AdaBoostClassifier,
-    GradientBoostingClassifier,
-    RandomForestClassifier,
-    VotingClassifier
-)
-from sklearn.linear_model import (
-    LogisticRegression,
-    PassiveAggressiveClassifier,
-    Perceptron,
-    RidgeClassifier,
-    SGDClassifier
-)
-from sklearn.metrics import accuracy_score, precision_score
-from sklearn.model_selection import (
-    GridSearchCV,
-    RandomizedSearchCV,
-    RepeatedStratifiedKFold,
-    train_test_split
-)
-from sklearn.naive_bayes import BernoulliNB, GaussianNB
-from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from sklearn.svm import LinearSVC, NuSVC, SVC
-from sklearn.tree import DecisionTreeClassifier
-
-# Deep Learning
-import tensorflow as tf
-from tensorflow.keras.layers import Activation, Dense, Dropout
-from tensorflow.keras.models import Sequential
-
-# Configuration
-filterwarnings('ignore')
-
 def run():
+    # Standard Library Imports
+    from collections import Counter
+    from warnings import filterwarnings
+
+    # Third-Party Imports
+    # Data Manipulation & Visualization
+    import matplotlib.pyplot as plt
+    import missingno as msno
+    import numpy as np
+    import pandas as pd
+    import seaborn as sns
+
+    # Plotly
+    import plotly.express as px
+    import plotly.figure_factory as ff
+    import plotly.graph_objs as go
+    import plotly.offline as py
+    import plotly.tools as tls
+    py.init_notebook_mode(connected=True)
+
+    # Streamlit
+    import streamlit as st
+
+    # Machine Learning
+    from sklearn.ensemble import (
+        AdaBoostClassifier,
+        GradientBoostingClassifier,
+        RandomForestClassifier,
+        VotingClassifier
+    )
+    from sklearn.linear_model import (
+        LogisticRegression,
+        PassiveAggressiveClassifier,
+        Perceptron,
+        RidgeClassifier,
+        SGDClassifier
+    )
+    from sklearn.metrics import accuracy_score, precision_score
+    from sklearn.model_selection import (
+        GridSearchCV,
+        RandomizedSearchCV,
+        RepeatedStratifiedKFold,
+        train_test_split
+    )
+    from sklearn.naive_bayes import BernoulliNB, GaussianNB
+    from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
+    from sklearn.preprocessing import MinMaxScaler, StandardScaler
+    from sklearn.svm import LinearSVC, NuSVC, SVC
+    from sklearn.tree import DecisionTreeClassifier
+
+    # Deep Learning
+    import tensorflow as tf
+    from tensorflow.keras.layers import Activation, Dense, Dropout
+    from tensorflow.keras.models import Sequential
+
+    # Configuration
+    filterwarnings('ignore')
+
+
     
     data = pd.read_csv('proyectos/water_potability.xls')
 
@@ -103,7 +104,7 @@ def run():
         legend=dict(x=1,y=0.96,bordercolor=colors_dark[4],borderwidth=0,tracegroupgap=5),
         bargap=0.3,
     )
-    st.pyplot(fig)
+    st.plotly_chart(fig)
 
     """**pH level:** El pH del agua es una medida del equilibrio ácido-base y, en la mayoría de las aguas naturales, está controlado por el sistema de equilibrio dióxido de carbono–bicarbonato–carbonato. Una mayor concentración de dióxido de carbono disminuirá el pH, mientras que una disminución hará que aumente. La temperatura también afectará el equilibrio y el pH. En el agua pura, el pH disminuye aproximadamente 0.45 cuando la temperatura aumenta 25 °C. En agua con una capacidad tampón proporcionada por iones de bicarbonato, carbonato y oxidrilo, este efecto de temperatura se modifica (APHA, 1989). El pH de la mayoría del agua potable está dentro del rango de 6.5–8.5. Las aguas naturales pueden tener un pH más bajo debido, por ejemplo, a la lluvia ácida, o un pH más alto en áreas con presencia de piedra caliza."""
 
