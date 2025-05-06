@@ -1,0 +1,23 @@
+# Streamlit
+streamlit
+
+# Data handling
+numpy
+pandas
+pathlib
+
+# Visualization
+matplotlib
+seaborn
+missingno
+plotly
+
+# Machine Learning
+scikit-learn
+tensorflow
+
+# Warnings management
+# (built-in, no need to install 'warnings' or 'importlib')
+
+# Optional: to ensure compatibility with notebooks (plotly)
+notebook
