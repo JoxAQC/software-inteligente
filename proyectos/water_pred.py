@@ -127,7 +127,7 @@ def run():
         legend=dict(x=1,y=0.96,bordercolor=colors_dark[4],borderwidth=0,tracegroupgap=5),
         bargap=0.3,
     )
-    st.pyplot(fig)
+    st.plotly_chart(fig)
 
     """**TDS**: TDS significa concentración de partículas o sólidos disueltos en el agua. TDS está compuesto por sales inorgánicas como calcio, magnesio, cloruros, sulfatos, bicarbonatos, entre otros, junto con muchos otros compuestos inorgánicos que se disuelven fácilmente en el agua."""
 
@@ -144,7 +144,7 @@ def run():
         legend=dict(x=1,y=0.96,bordercolor=colors_dark[4],borderwidth=0,tracegroupgap=5),
         bargap=0.3,
     )
-    st.pyplot(fig)
+    st.plotly_chart(fig)
 
     """**Chloramines**: Las cloraminas (también conocidas como desinfección secundaria) son desinfectantes utilizados para tratar el agua potable y:
 
@@ -171,7 +171,7 @@ def run():
         legend=dict(x=1,y=0.96,bordercolor=colors_dark[4],borderwidth=0,tracegroupgap=5),
         bargap=0.3,
     )
-    st.pyplot(fig)
+    st.plotly_chart(fig)
 
     """**Sulfate**: El sulfato (SO4) se puede encontrar en casi toda el agua natural. El origen de la mayoría de los compuestos de sulfato es la oxidación de minerales de sulfito, la presencia de lutitas o los desechos industriales.
     El sulfato es uno de los principales componentes disueltos en la lluvia. Altas concentraciones de sulfato en el agua que bebemos pueden tener un efecto laxante cuando se combinan con calcio y magnesio, los dos componentes más comunes de la dureza.
@@ -194,7 +194,7 @@ def run():
         legend=dict(x=1,y=0.96,bordercolor=colors_dark[4],borderwidth=0,tracegroupgap=5),
         bargap=0.3,
     )
-    st.pyplot(fig)
+    st.plotly_chart(fig)
 
     """**Conductivity**: La conductividad es una medida de la capacidad del agua para transmitir una corriente eléctrica. Dado que las sales disueltas y otros químicos inorgánicos conducen la corriente eléctrica, la conductividad aumenta a medida que aumenta la salinidad. Los compuestos orgánicos como el aceite no conducen muy bien la corriente eléctrica y, por lo tanto, tienen una baja conductividad cuando están en el agua. La conductividad también se ve afectada por la temperatura: cuanto más caliente es el agua, mayor es la conductividad.
 
@@ -216,7 +216,7 @@ def run():
         legend=dict(x=1,y=0.96,bordercolor=colors_dark[4],borderwidth=0,tracegroupgap=5),
         bargap=0.3,
     )
-    st.pyplot(fig)
+    st.plotly_chart(fig)
 
     """**Organic Carbon**: Los contaminantes orgánicos (sustancias orgánicas naturales, insecticidas, herbicidas y otros químicos agrícolas) ingresan a las vías fluviales a través del agua de escorrentía de las lluvias. Las aguas residuales domésticas e industriales también aportan contaminantes orgánicos en diferentes cantidades. Como resultado de derrames accidentales o fugas, los desechos orgánicos industriales pueden llegar a los ríos y arroyos. Algunos de estos contaminantes pueden no ser completamente eliminados por los procesos de tratamiento, por lo que podrían convertirse en un problema para las fuentes de agua potable. Es importante conocer el contenido orgánico en una vía fluvial."""
 
@@ -237,7 +237,7 @@ def run():
         legend=dict(x=1,y=0.96,bordercolor=colors_dark[4],borderwidth=0,tracegroupgap=5),
         bargap=0.3,
     )
-    st.pyplot(fig)
+    st.plotly_chart(fig)
 
     """**Trihalomethanes**: Los trihalometanos (THMs) son el resultado de una reacción entre el cloro utilizado para desinfectar el agua del grifo y la materia orgánica natural en el agua. En niveles elevados, los THMs se han asociado con efectos negativos para la salud, como el cáncer y resultados adversos en la reproducción."""
 
@@ -258,7 +258,7 @@ def run():
         legend=dict(x=1,y=0.96,bordercolor=colors_dark[4],borderwidth=0,tracegroupgap=5),
         bargap=0.3,
     )
-    st.pyplot(fig)
+    st.plotly_chart(fig)
 
     """**Turbidity**: La turbidez es la medida de la claridad relativa de un líquido. Es una característica óptica del agua y es una medida de la cantidad de luz que se dispersa por el material en el agua cuando se ilumina una muestra de agua. Cuanto mayor sea la intensidad de la luz dispersada, mayor será la turbidez. El material que provoca que el agua sea turbia incluye arcilla, limo, materia inorgánica y orgánica muy pequeña, algas, compuestos orgánicos disueltos coloreados, y plancton y otros organismos microscópicos.
 
@@ -281,7 +281,7 @@ def run():
         legend=dict(x=1,y=0.96,bordercolor=colors_dark[4],borderwidth=0,tracegroupgap=5),
         bargap=0.3,
     )
-    st.pyplot(fig)
+    st.plotly_chart(fig)
 
     trace = go.Pie(labels = ['Potable', 'Not Potable'], values = data['Potability'].value_counts(),
                 textfont=dict(size=15), opacity = 0.8,
