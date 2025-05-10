@@ -30,6 +30,49 @@
 /* 1. Defaults & Reset of specific styles across browsers */
 /*------------------------------------------------------------------------------------------*/
 
+
+.gallery-item .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.gallery-item:hover .overlay {
+    opacity: 1;
+}
+
+.gallery-item h3 {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.btn-overlay {
+    background: white;
+    color: black;
+    padding: 6px 14px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.3s ease, color 0.3s ease;
+    font-weight: bold;
+}
+
+.btn-overlay:hover {
+    background: black;
+    color: white;
+}
+
+
 *, *:before, *:after {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
