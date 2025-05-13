@@ -5,7 +5,7 @@ Este repositorio contiene una página web con un índice de proyectos interactiv
 
 🔗 [https://joxaqc.github.io/software-inteligente/](https://joxaqc.github.io/software-inteligente/)
 
-Desde la sección **"Programas"**, puedes acceder a los siguientes proyectos desplegados en **Streamlit Cloud**:
+Desde la sección **"Programas"**, puedes acceder a los siguientes proyectos desplegados en **Streamlit Cloud**, en caso aparezca que la app esta suspendida se debe presionar el boton azul para volverla a lanzar la aplicación, suele demorar un poco, por lo que también se puede optar por la ejecución local:
 
 ## 📦 Proyectos en la nube
 
