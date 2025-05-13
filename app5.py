@@ -277,6 +277,12 @@ with tab3:
 with tab4:
     st.header("Modelado y Evaluación")
     
+    # Importar todos los modelos necesarios al inicio (FUERA de los bloques condicionales)
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.svm import SVC
+    from sklearn.neighbors import KNeighborsClassifier
+    
     # Función mejorada para evaluar modelos
     def evaluate_model(model, model_name, X_test, y_test, is_nn=False):
         try:
@@ -286,7 +292,7 @@ with tab4:
             else:
                 y_pred = model.predict(X_test)
             
-            # Asegurar que los datos sean numpy arrays y tengan la misma longitud
+            # Asegurar que los datos sean numpy arrays
             y_test = np.array(y_test).ravel()
             y_pred = np.array(y_pred).ravel()
             
@@ -297,15 +303,8 @@ with tab4:
                 y_pred = y_pred[:min_length]
                 st.warning(f"Ajustadas las longitudes a {min_length} muestras")
             
-            # Verificar valores únicos
-            unique_values = set(np.unique(y_test)).union(set(np.unique(y_pred)))
-            if unique_values != {0, 1}:
-                st.error(f"Valores encontrados: {unique_values}. Se esperaban [0, 1]")
-                return 0
-            
-            # Calcular métricas con manejo de errores
+            # Calcular métricas con manejo robusto
             try:
-                precision = precision_score(y_test, y_pred, zero_division=0)
                 report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
                 cm = confusion_matrix(y_test, y_pred)
                 
@@ -314,18 +313,19 @@ with tab4:
                 
                 with col1:
                     st.metric("Accuracy", f"{report['accuracy']:.2%}")
-                    st.metric("Precisión (Clase 1)", f"{report['1']['precision']:.2%}")
-                    st.metric("Recall (Clase 1)", f"{report['1']['recall']:.2%}")
+                    if '1' in report:
+                        st.metric("Precisión (Clase 1)", f"{report['1']['precision']:.2%}")
+                        st.metric("Recall (Clase 1)", f"{report['1']['recall']:.2%}")
                 
                 with col2:
                     fig, ax = plt.subplots()
                     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                               xticklabels=['No Potable', 'Potable'],
-                               yticklabels=['No Potable', 'Potable'])
+                              xticklabels=['No Potable', 'Potable'],
+                              yticklabels=['No Potable', 'Potable'])
                     ax.set_title('Matriz de Confusión')
                     st.pyplot(fig)
                 
-                return precision
+                return report['accuracy']  # Usamos accuracy como métrica principal
                 
             except Exception as e:
                 st.error(f"Error en métricas: {str(e)}")
@@ -338,44 +338,30 @@ with tab4:
     # Entrenamiento y evaluación de modelos
     results = {}
     
-    # Modelos clásicos
+    # Modelos clásicos - Versión simplificada y robusta
+    model_classes = {
+        "Regresión Logística": LogisticRegression,
+        "Random Forest": RandomForestClassifier,
+        "SVM": SVC,
+        "KNN": KNeighborsClassifier
+    }
+    
     for model_name, config in models_options.items():
-        if config["active"]:
+        if config["active"] and model_name in model_classes:
             try:
                 st.subheader(model_name)
                 
                 with st.spinner(f"Entrenando {model_name}..."):
-                    if model_name == "Regresión Logística":
-                        from sklearn.linear_model import LogisticRegression
-                        model = LogisticRegression(
-                            max_iter=config["params"]["max_iter"],
-                            C=config["params"]["C"],
-                            random_state=random_state
-                        )
-                    elif model_name == "Random Forest":
-                        from sklearn.ensemble import RandomForestClassifier
-                        model = RandomForestClassifier(
-                            n_estimators=config["params"]["n_estimators"],
-                            max_depth=config["params"]["max_depth"],
-                            random_state=random_state
-                        )
-                    elif model_name == "SVM":
-                        from sklearn.svm import SVC
-                        model = SVC(
-                            C=config["params"]["C"],
-                            kernel=config["params"]["kernel"],
-                            random_state=random_state,
-                            probability=True
-                        )
-                    elif model_name == "KNN":
-                        from sklearn.neighbors import KNeighborsClassifier
-                        model = KNeighborsClassifier(
-                            n_neighbors=config["params"]["n_neighbors"]
-                        )
-                
+                    # Crear instancia del modelo con parámetros
+                    model = model_classes[model_name](**{
+                        'random_state': random_state,
+                        **config["params"]
+                    })
+                    
+                    # Entrenar y evaluar
                     model.fit(X_train_scaled, y_train)
-                    precision = evaluate_model(model, model_name, X_test_scaled, y_test, is_nn=False)
-                    results[model_name] = precision
+                    score = evaluate_model(model, model_name, X_test_scaled, y_test)
+                    results[model_name] = score
                 
             except Exception as e:
                 st.error(f"Error entrenando {model_name}: {str(e)}")
@@ -442,23 +428,18 @@ with tab4:
         except Exception as e:
             st.error(f"Error en red neuronal: {str(e)}")
             results["Red Neuronal"] = 0
-    
-    # Comparativa de modelos
+
+    # Comparativa final
     if len(results) > 1:
-        st.subheader("Comparativa de Modelos")
+        st.subheader("Resultados Finales")
         df_results = pd.DataFrame({
             "Modelo": results.keys(),
-            "Precisión": results.values()
-        }).sort_values("Precisión", ascending=False)
+            "Accuracy": results.values()
+        }).sort_values("Accuracy", ascending=False)
         
-        fig = px.bar(df_results, x='Modelo', y='Precisión', 
-                    color='Precisión', text='Precisión',
+        fig = px.bar(df_results, x='Modelo', y='Accuracy',
+                    color='Accuracy', text='Accuracy',
                     color_continuous_scale='Blues')
         fig.update_layout(yaxis_tickformat=".0%")
         fig.update_traces(texttemplate='%{text:.2%}', textposition='outside')
         st.plotly_chart(fig, use_container_width=True)
-        
-        # Exportar resultados
-        if st.button("Exportar Resultados a CSV"):
-            df_results.to_csv("resultados_modelos.csv", index=False)
-            st.success("Resultados exportados correctamente!")
