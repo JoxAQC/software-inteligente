@@ -373,9 +373,9 @@ with tab4:
                             n_neighbors=config["params"]["n_neighbors"]
                         )
                 
-                model.fit(X_train_scaled, y_train)
-                precision = evaluate_model(model, model_name, X_test_scaled, y_test, is_nn=False)
-                results[model_name] = precision
+                    model.fit(X_train_scaled, y_train)
+                    precision = evaluate_model(model, model_name, X_test_scaled, y_test, is_nn=False)
+                    results[model_name] = precision
                 
             except Exception as e:
                 st.error(f"Error entrenando {model_name}: {str(e)}")
