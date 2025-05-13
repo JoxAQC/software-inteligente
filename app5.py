@@ -352,12 +352,13 @@ with tab4:
                 st.subheader(model_name)
                 
                 with st.spinner(f"Entrenando {model_name}..."):
-                    # Crear instancia del modelo con parámetros
-                    model = model_classes[model_name](**{
-                        'random_state': random_state,
-                        **config["params"]
-                    })
-                    
+                    model_args = config["params"].copy()
+
+                    # Solo agregar 'random_state' si el modelo lo soporta
+                    if "random_state" in model_classes[model_name]().__init__.__code__.co_varnames:
+                        model_args["random_state"] = random_state
+
+                    model = model_classes[model_name](**model_args)
                     # Entrenar y evaluar
                     model.fit(X_train_scaled, y_train)
                     score = evaluate_model(model, model_name, X_test_scaled, y_test)
