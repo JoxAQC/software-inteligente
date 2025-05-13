@@ -57,6 +57,14 @@
     color: white;
 }
 
+.gallery-item{
+    width: 50%;
+}
+
+.gallery-item img {
+    width: 100%;
+}
+
 .btn-overlay {
     background: white;
     color: black;

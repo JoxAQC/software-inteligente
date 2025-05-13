@@ -5,6 +5,8 @@ streamlit
 numpy
 pandas
 pathlib
+xlrd 
+openpyxl
 
 # Visualization
 matplotlib
@@ -15,6 +17,7 @@ plotly
 # Machine Learning
 scikit-learn
 tensorflow
+imblearn
 
 # Warnings management
 # (built-in, no need to install 'warnings' or 'importlib')
