@@ -278,37 +278,53 @@ with tab4:
     st.header("Modelado y Evaluación")
     
     # Función para evaluar modelos
-    def evaluate_model(model, model_name, X_test, y_test):
-        y_pred = model.predict(X_test)
+    def evaluate_model(model, model_name, X_test, y_test, is_nn=False):
+        if is_nn:
+            y_pred = (model.predict(X_test) > 0.5).astype(int).flatten()  # Aplanar las predicciones
+        else:
+            y_pred = model.predict(X_test)
         
-        # Métricas
-        precision = precision_score(y_test, y_pred)
-        report = classification_report(y_test, y_pred, output_dict=True)
-        cm = confusion_matrix(y_test, y_pred)
+        # Asegurar que y_test sea un array numpy
+        y_test = np.array(y_test)
         
-        # Mostrar resultados
-        col1, col2, col3 = st.columns([1,2,2])
+        # Verificar formas
+        st.write(f"Forma de y_test: {y_test.shape}")
+        st.write(f"Forma de y_pred: {y_pred.shape}")
         
-        with col1:
-            st.metric("Precisión", f"{precision:.2%}")
-            st.metric("Recall", f"{report['weighted avg']['recall']:.2%}")
-            st.metric("F1-Score", f"{report['weighted avg']['f1-score']:.2%}")
-        
-        with col2:
-            st.text("Reporte de Clasificación:")
-            st.dataframe(pd.DataFrame(report).transpose())
-        
-        with col3:
-            fig, ax = plt.subplots()
-            sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                       xticklabels=['No Potable', 'Potable'],
-                       yticklabels=['No Potable', 'Potable'])
-            ax.set_xlabel('Predicción')
-            ax.set_ylabel('Real')
-            ax.set_title('Matriz de Confusión')
-            st.pyplot(fig)
-        
-        return precision
+        # Calcular métricas
+        try:
+            precision = precision_score(y_test, y_pred)
+            report = classification_report(y_test, y_pred, output_dict=True)
+            cm = confusion_matrix(y_test, y_pred)
+            
+            # Mostrar resultados
+            col1, col2, col3 = st.columns([1,2,2])
+            
+            with col1:
+                st.metric("Precisión", f"{precision:.2%}")
+                st.metric("Recall", f"{report['weighted avg']['recall']:.2%}")
+                st.metric("F1-Score", f"{report['weighted avg']['f1-score']:.2%}")
+            
+            with col2:
+                st.text("Reporte de Clasificación:")
+                st.dataframe(pd.DataFrame(report).transpose())
+            
+            with col3:
+                fig, ax = plt.subplots()
+                sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                           xticklabels=['No Potable', 'Potable'],
+                           yticklabels=['No Potable', 'Potable'])
+                ax.set_xlabel('Predicción')
+                ax.set_ylabel('Real')
+                ax.set_title('Matriz de Confusión')
+                st.pyplot(fig)
+            
+            return precision
+        except Exception as e:
+            st.error(f"Error al evaluar modelo {model_name}: {str(e)}")
+            st.write("Valores únicos en y_test:", np.unique(y_test))
+            st.write("Valores únicos en y_pred:", np.unique(y_pred))
+            return 0
     
     # Entrenamiento y evaluación de modelos
     results = {}
@@ -348,7 +364,143 @@ with tab4:
                     )
                 
                 model.fit(X_train_scaled, y_train)
-                precision = evaluate_model(model, model_name, X_test_scaled, y_test)
+                precision = evaluate_model(model, model_name, X_test_scaled, y_test, is_nn=False)
+                results[model_name] = precision
+    
+    # Red Neuronal
+    if use_nn:
+        st.subheader("Red Neuronal")
+        
+        with st.spinner("Entrenando red neuronal..."):
+            from tensorflow.keras.models import Sequential
+            from tensorflow.keras.layers import Dense, Dropout
+            from tensorflow.keras.optimizers import Adam
+            
+            model = Sequential([
+                Dense(nn_params["hidden_units"], activation='relu', input_shape=(X_train_scaled.shape[1],)),
+                Dropout(nn_params["dropout_rate"]),
+                Dense(1, activation='sigmoid')
+            ])
+            
+            optimizer = Adam(learning_rate=nn_params["learning_rate"])
+            model.compile(optimizer=optimizer, 
+                         loss='binary_crossentropy', 
+                         metrics=['accuracy'])
+            
+            history = model.fit(
+                X_train_scaled, y_train,
+                epochs=nn_params["epochs"],
+                batch_size=nn_params["batch_size"],
+                validation_data=(X_test_scaled, y_test),
+                verbose=0
+            )
+            
+            # Mostrar historia de entrenamiento
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+            ax1.plot(history.history['accuracy'], label='Train Accuracy')
+            ax1.plot(history.history['val_accuracy'], label='Validation Accuracy')
+            ax1.set_title('Accuracy')
+            ax1.legend()
+            
+            ax2.plot(history.history['loss'], label='Train Loss')
+            ax2.plot(history.history['val_loss'], label='Validation Loss')
+            ax2.set_title('Loss')
+            ax2.legend()
+            
+            st.pyplot(fig)
+            
+            # Evaluación
+            precision = evaluate_model(model, "Red Neuronal", X_test_scaled, y_test, is_nn=True)
+            results["Red Neuronal"] = precision
+    
+    # Comparativa de modelos
+    if len(results) > 1:
+        st.subheader("Comparativa de Modelos")
+        df_results = pd.DataFrame({
+            "Modelo": results.keys(),
+            "Precisión": results.values()
+        }).sort_values("Precisión", ascending=False)
+        
+        fig = px.bar(df_results, x='Modelo', y='Precisión', 
+                    color='Precisión', text='Precisión',
+                    color_continuous_scale='Blues')
+        fig.update_layout(yaxis_tickformat=".0%")
+        fig.update_traces(texttemplate='%{text:.2%}', textposition='outside')
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Exportar resultados
+        if st.button("Exportar Resultados a CSV"):
+            df_results.to_csv("resultados_modelos.csv", index=False)
+            st.success("Resultados exportados correctamente!")
+    st.header("Modelado y Evaluación")
+    
+    # Función para evaluar modelos
+    def evaluate_model(model, model_name, X_test, y_test, is_nn=False):
+        if is_nn:
+            y_pred = (model.predict(X_test) > 0.5).astype(int).flatten()  # Aplanar las predicciones
+        else:
+            y_pred = model.predict(X_test)
+        
+        # Asegurar que y_test sea un array numpy
+        y_test = np.array(y_test)
+        
+        # Verificar formas
+        st.write(f"Forma de y_test: {y_test.shape}")
+        st.write(f"Forma de y_pred: {y_pred.shape}")
+        
+        # Calcular métricas
+        try:
+            precision = precision_score(y_test, y_pred)
+            report = classification_report(y_test, y_pred, output_dict=True)
+            cm = confusion_matrix(y_test, y_pred)
+            
+            # Resto del código de visualización...
+            return precision
+        except Exception as e:
+            st.error(f"Error al evaluar modelo {model_name}: {str(e)}")
+            st.write("Valores únicos en y_test:", np.unique(y_test))
+            st.write("Valores únicos en y_pred:", np.unique(y_pred))
+            return 0
+    #Entrenamiento y evaluación de modelos
+    results = {}
+    
+    # Modelos clásicos
+    for model_name, config in models_options.items():
+        if config["active"]:
+            st.subheader(model_name)
+            
+            with st.spinner(f"Entrenando {model_name}..."):
+                if model_name == "Regresión Logística":
+                    from sklearn.linear_model import LogisticRegression
+                    model = LogisticRegression(
+                        max_iter=config["params"]["max_iter"],
+                        C=config["params"]["C"],
+                        random_state=random_state
+                    )
+                elif model_name == "Random Forest":
+                    from sklearn.ensemble import RandomForestClassifier
+                    model = RandomForestClassifier(
+                        n_estimators=config["params"]["n_estimators"],
+                        max_depth=config["params"]["max_depth"],
+                        random_state=random_state
+                    )
+                elif model_name == "SVM":
+                    from sklearn.svm import SVC
+                    model = SVC(
+                        C=config["params"]["C"],
+                        kernel=config["params"]["kernel"],
+                        random_state=random_state,
+                        probability=True
+                    )
+                elif model_name == "KNN":
+                    from sklearn.neighbors import KNeighborsClassifier
+                    model = KNeighborsClassifier(
+                        n_neighbors=config["params"]["n_neighbors"]
+                    )
+                
+                model.fit(X_train_scaled, y_train)
+                # En la sección de red neuronal (cerca de la línea 401):
+                precision = evaluate_model(model, "Red Neuronal", X_test_scaled, y_test, is_nn=True)
                 results[model_name] = precision
     
     # Red Neuronal
