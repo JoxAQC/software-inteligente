@@ -344,7 +344,34 @@ with tab4:
             try:
                 st.subheader(model_name)
                 
-                # [Código de configuración de modelos clásicos permanece igual...]
+                with st.spinner(f"Entrenando {model_name}..."):
+                    if model_name == "Regresión Logística":
+                        from sklearn.linear_model import LogisticRegression
+                        model = LogisticRegression(
+                            max_iter=config["params"]["max_iter"],
+                            C=config["params"]["C"],
+                            random_state=random_state
+                        )
+                    elif model_name == "Random Forest":
+                        from sklearn.ensemble import RandomForestClassifier
+                        model = RandomForestClassifier(
+                            n_estimators=config["params"]["n_estimators"],
+                            max_depth=config["params"]["max_depth"],
+                            random_state=random_state
+                        )
+                    elif model_name == "SVM":
+                        from sklearn.svm import SVC
+                        model = SVC(
+                            C=config["params"]["C"],
+                            kernel=config["params"]["kernel"],
+                            random_state=random_state,
+                            probability=True
+                        )
+                    elif model_name == "KNN":
+                        from sklearn.neighbors import KNeighborsClassifier
+                        model = KNeighborsClassifier(
+                            n_neighbors=config["params"]["n_neighbors"]
+                        )
                 
                 model.fit(X_train_scaled, y_train)
                 precision = evaluate_model(model, model_name, X_test_scaled, y_test, is_nn=False)
