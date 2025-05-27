@@ -15,14 +15,25 @@ from sklearn.neighbors import KNeighborsClassifier
 
 st.title("📊 Clasificación de Ingresos con Múltiples Modelos")
 
+# Inicializar variables en session_state si no existen
+if 'modelo_entrenado' not in st.session_state:
+    st.session_state.modelo_entrenado = False
+if 'mejor_modelo' not in st.session_state:
+    st.session_state.mejor_modelo = None
+if 'le' not in st.session_state:
+    st.session_state.le = None
+if 'columnas_dummies' not in st.session_state:
+    st.session_state.columnas_dummies = None
+if 'columnas_originales' not in st.session_state:
+    st.session_state.columnas_originales = None
+
 archivo = st.file_uploader("📂 Carga el archivo CSV", type=["csv"])
 tiene_header = st.checkbox("El archivo tiene encabezado", value=True)
-
 
 nombres_columnas = []
 if not tiene_header:
     columnas_raw = st.text_input("Nombres de columnas (separados por coma)", 
-                                    value="age,workclass,fnlwgt,education,education-num,marital-status,occupation,relationship,race,sex,capital-gain,capital-loss,hours-per-week,native-country,income")
+                                value="age,workclass,fnlwgt,education,education-num,marital-status,occupation,relationship,race,sex,capital-gain,capital-loss,hours-per-week,native-country,income")
     if columnas_raw:
         nombres_columnas = [col.strip() for col in columnas_raw.split(",")]
 
@@ -46,9 +57,17 @@ if archivo is not None:
         X = df.drop("income", axis=1)
         y = df["income"]
 
+        # Guardar las columnas originales
+        st.session_state.columnas_originales = X.columns.tolist()
+        
+        # Preprocesamiento
         X_encoded = pd.get_dummies(X)
         le = LabelEncoder()
         y_encoded = le.fit_transform(y)
+
+        # Guardar las columnas después del one-hot encoding
+        st.session_state.columnas_dummies = X_encoded.columns.tolist()
+        st.session_state.le = le
 
         X_train, X_test, y_train, y_test = train_test_split(X_encoded, y_encoded, test_size=0.2, random_state=42)
 
@@ -62,6 +81,7 @@ if archivo is not None:
             }
 
             resultados = []
+            mejores_modelos = {}
 
             for nombre, modelo in modelos.items():
                 modelo.fit(X_train, y_train)
@@ -82,6 +102,8 @@ if archivo is not None:
                     "F1 Score": f1,
                     "AUC": auc
                 })
+
+                mejores_modelos[nombre] = modelo
 
                 st.subheader(f"🔍 Resultados: {nombre}")
                 st.write(f"**Accuracy**:  {acc:.4f}")
@@ -113,6 +135,13 @@ if archivo is not None:
             resultados_df = pd.DataFrame(resultados).set_index("Modelo")
             st.dataframe(resultados_df.style.format("{:.4f}").highlight_max(axis=0, color="lightgreen"))
 
+            # Identificar el mejor modelo
+            mejor_modelo_nombre = resultados_df['Accuracy'].idxmax()
+            st.session_state.mejor_modelo = mejores_modelos[mejor_modelo_nombre]
+            st.session_state.modelo_entrenado = True
+            
+            st.success(f"🌟 El mejor modelo es: {mejor_modelo_nombre} (Accuracy: {resultados_df.loc[mejor_modelo_nombre, 'Accuracy']:.4f})")
+
             st.subheader("📦 Distribución de Edad por Nivel de Ingreso")
             fig, ax = plt.subplots()
             sns.boxplot(data=df, x="income", y="age", ax=ax)
@@ -126,3 +155,54 @@ if archivo is not None:
 
     except Exception as e:
         st.error(f"❌ Error al procesar el archivo: {e}")
+
+# Sección de predicción (siempre visible si hay un modelo entrenado)
+if st.session_state.modelo_entrenado:
+    st.subheader("🔮 Predecir Income con Nuevos Datos")
+    
+    # Crear un formulario para ingresar los valores
+    with st.form("prediccion_form"):
+        st.write("Ingrese los valores para predecir el income:")
+        
+        # Crear inputs para cada columna original (sin income)
+        valores = {}
+        for col in st.session_state.columnas_originales:
+            if df[col].dtype == 'object':
+                # Para variables categóricas, mostrar un selectbox con las opciones disponibles
+                opciones = df[col].unique().tolist()
+                valores[col] = st.selectbox(f"{col}", opciones)
+            else:
+                # Para variables numéricas, mostrar un input numérico
+                min_val = float(df[col].min())
+                max_val = float(df[col].max())
+                valores[col] = st.number_input(f"{col}", min_value=min_val, max_value=max_val, value=min_val)
+        
+        submitted = st.form_submit_button("Predecir Income")
+        
+        if submitted:
+            # Crear un DataFrame con los valores ingresados
+            nuevo_dato = pd.DataFrame([valores])
+            
+            # Aplicar one-hot encoding al nuevo dato
+            nuevo_dato_encoded = pd.get_dummies(nuevo_dato)
+            
+            # Asegurarse de que todas las columnas de entrenamiento estén presentes
+            for col in st.session_state.columnas_dummies:
+                if col not in nuevo_dato_encoded.columns:
+                    nuevo_dato_encoded[col] = 0
+            
+            # Ordenar las columnas en el mismo orden que los datos de entrenamiento
+            nuevo_dato_encoded = nuevo_dato_encoded[st.session_state.columnas_dummies]
+            
+            # Hacer la predicción
+            prediccion_encoded = st.session_state.mejor_modelo.predict(nuevo_dato_encoded)
+            prediccion = st.session_state.le.inverse_transform(prediccion_encoded)
+            
+            # Mostrar la predicción
+            st.success(f"Predicción de Income: {prediccion[0]}")
+            
+            # Si el modelo soporta probabilidades, mostrarlas
+            if hasattr(st.session_state.mejor_modelo, 'predict_proba'):
+                probabilidades = st.session_state.mejor_modelo.predict_proba(nuevo_dato_encoded)[0]
+                for i, clase in enumerate(st.session_state.le.classes_):
+                    st.write(f"Probabilidad de {clase}: {probabilidades[i]:.2f}")
