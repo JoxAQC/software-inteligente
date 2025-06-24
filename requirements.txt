@@ -16,7 +16,8 @@ plotly
 
 # Machine Learning
 scikit-learn
-tensorflow
+tensorflow>=2.0.0
+tensorflow-datasets
 imblearn
 
 # Warnings management
