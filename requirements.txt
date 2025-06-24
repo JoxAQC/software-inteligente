@@ -16,8 +16,8 @@ plotly
 
 # Machine Learning
 scikit-learn
-tensorflow>=2.0.0
-tensorflow-datasets
+tensorflow==2.15.0  # Última versión con soporte amplio
+tensorflow-datasets==4.9.0
 imblearn
 
 # Warnings management
