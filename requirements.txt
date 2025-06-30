@@ -13,16 +13,11 @@ matplotlib
 seaborn
 missingno
 plotly
-wordcloud  # Nuevo - Para nubes de palabras
 
 # Machine Learning
 scikit-learn
 tensorflow
 imblearn
-textblob  # Nuevo - Para análisis de sentimientos basado en reglas
-
-# NLP
-nltk  # Nuevo - Dependencia de TextBlob
 
 # Warnings management
 # (built-in, no need to install 'warnings' or 'importlib')
